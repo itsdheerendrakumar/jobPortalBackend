@@ -1,0 +1,4 @@
+MONGODB_URL=mongodbUrl
+PORT=3002
+SALT=11
+JWT_SECRET=secretCode
