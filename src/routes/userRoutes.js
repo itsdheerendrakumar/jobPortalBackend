@@ -1,6 +1,6 @@
 import express from "express";
 import { validateCommonSignup } from "../middleware/validateCommonSignup.js";
-import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus } from "../controller/user/index.js";
+import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus, promoteReviewer } from "../controller/user/index.js";
 import { tokenValidater } from "../middleware/validateToken.js";
 import { catchHandler } from "../utils/catchHandler.js";
 import { validateRole } from "../middleware/validateRole.js";
@@ -26,6 +26,12 @@ router.route("/reviewer")
     catchHandler(validateRole(["admin"])),
     catchHandler(validateCommonSignup),
     catchHandler(createUser("reviewer"))
+)
+router.patch(
+    "/promote-reviewer",
+    catchHandler(tokenValidater),
+    catchHandler(validateRole(["superAdmin"])),
+    catchHandler(promoteReviewer)
 )
 
 router.get(

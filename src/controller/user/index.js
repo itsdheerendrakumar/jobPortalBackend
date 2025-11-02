@@ -79,3 +79,15 @@ export const deleteAdmin = async (req, res, next) => {
         next(new ErrorResponse("Invalid admin id", 400))
     res.status(200).json(new SuccessResponse("Account deleted successfully", {}))
 }
+
+export const promoteReviewer = async (req, res, next) => {
+    const {userId} = req.body;
+    if(!userId)
+        return next(new ErrorResponse("Invalid user id.", 400))
+    const user = await User.findById(userId);
+    if(!user || user.role !== "reviewer")
+        return next(new ErrorResponse("User does not found", 400));
+    user.role = "admin";
+    await user.save();
+    return res.status(200).json(new SuccessResponse("User promoted successfully.", {}));
+}
