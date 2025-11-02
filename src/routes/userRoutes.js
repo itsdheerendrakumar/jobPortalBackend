@@ -1,6 +1,6 @@
 import express from "express";
 import { validateCommonSignup } from "../middleware/validateCommonSignup.js";
-import { createAdmin, deleteAdmin, getAdminListing, getSuperAdminMetrics, updateAdminStatus } from "../controller/user/index.js";
+import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus } from "../controller/user/index.js";
 import { tokenValidater } from "../middleware/validateToken.js";
 import { catchHandler } from "../utils/catchHandler.js";
 import { validateRole } from "../middleware/validateRole.js";
@@ -11,13 +11,21 @@ router.route("/admin")
     catchHandler(tokenValidater), 
     catchHandler(validateRole(["superAdmin"])),
     catchHandler(validateCommonSignup),
-    catchHandler(createAdmin)
+    catchHandler(createUser("admin"))
 )
 router.route("/admin/:adminId")
 .delete(
     catchHandler(tokenValidater),
     catchHandler(validateRole(["superAdmin"])),
     catchHandler(deleteAdmin)
+)
+
+router.route("/reviewer")
+.post(
+    catchHandler(tokenValidater),
+    catchHandler(validateRole(["admin"])),
+    catchHandler(validateCommonSignup),
+    catchHandler(createUser("reviewer"))
 )
 
 router.get(
@@ -30,7 +38,13 @@ router.get(
     "/admin-listing", 
     catchHandler(tokenValidater), 
     catchHandler(validateRole(["superAdmin"])),
-    catchHandler(getAdminListing)
+    catchHandler(getUserListing("admin"))
+);
+router.get(
+    "/reviewer-listing", 
+    catchHandler(tokenValidater), 
+    catchHandler(validateRole(["superAdmin", "admin"])),
+    catchHandler(getUserListing("reviewer"))
 );
 
 router.patch(

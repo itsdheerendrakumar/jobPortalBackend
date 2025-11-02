@@ -4,18 +4,23 @@ import { User } from "../../model/userModel.js";
 import { SuccessResponse } from "../../utils/successResponse.js";
 import { userStatus } from "../../constants/enums.js";
 
-export const createAdmin = async (req, res, next) => {
+export const createUser = (role) => {
+    return async (req, res, next) => {
 
-    const {password, ...rest} = req.validatedData;
-    const {deletePermission} = req.body;
-    const currentUser = await User.findOne({email: req.validatedData.email});
-    if(!!currentUser)
-        return next(new ErrorResponse("User with this email already exists", 400));
-    const hashedPassword = await bcrypt.hash(password,parseInt(process.env.SALT));
-    const role = "admin";
-    console.log(req.validatedData)
-    const adminUser = await User.insertOne({...rest, role, password: hashedPassword, deletePermission});
-    return res.status(201).json(new SuccessResponse("Account created successfully", {}))
+        const {password, ...rest} = req.validatedData;
+        const {deletePermission} = req.body;
+        const currentUser = await User.findOne({email: req.validatedData.email});
+        if(!!currentUser)
+            return next(new ErrorResponse("User with this email already exists", 400));
+        const hashedPassword = await bcrypt.hash(password,parseInt(process.env.SALT));
+        const user = await User.insertOne({
+            ...rest, 
+            role, 
+            password: hashedPassword, 
+            ...(typeof deletePermission === "boolean" && {deletePermission})
+        });
+        return res.status(201).json(new SuccessResponse("Account created successfully", {}))
+    }
 }
 
 export const getSuperAdminMetrics = async (req, res, next) => {
@@ -45,9 +50,13 @@ export const getSuperAdminMetrics = async (req, res, next) => {
 
 }
 
-export const getAdminListing = async (req, res, next) => {
-    const admins = await User.find({role: "admin"}).select({password: 0, education: 0});
-    return res.status(200).json(new SuccessResponse("Admin listing found successfully", admins))
+export const getUserListing = (role) => {
+    return async (req, res, next) => {
+        const users = await User.find({role}).select({password: 0, education: 0});
+        return res.status(200).json(new SuccessResponse(
+            `${role === "admin" ? "Admin" : (role === "reviewer" ? "Reviewer" : "User")} listing found successfully"`, users
+        ))
+    }
 }
 
 export const updateAdminStatus = async (req, res, next) => {
