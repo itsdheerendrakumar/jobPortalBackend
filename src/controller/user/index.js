@@ -3,6 +3,7 @@ import { ErrorResponse } from "../../utils/errorResponse.js";
 import { User } from "../../model/userModel.js";
 import { SuccessResponse } from "../../utils/successResponse.js";
 import { userStatus } from "../../constants/enums.js";
+import { Job } from "../../model/jobModel.js";
 
 export const createUser = (role) => {
     return async (req, res, next) => {
@@ -76,7 +77,8 @@ export const deleteAdmin = async (req, res, next) => {
     const {adminId} = req.params;
     const user = await User.findByIdAndDelete(adminId);
     if(!user || user.role !== "admin")
-        next(new ErrorResponse("Invalid admin id", 400))
+        next(new ErrorResponse("Invalid admin id", 400));
+    await Job.updateMany({createdBy: adminId}, {createdBy: undefined});
     res.status(200).json(new SuccessResponse("Account deleted successfully", {}))
 }
 

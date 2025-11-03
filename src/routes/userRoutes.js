@@ -59,4 +59,10 @@ router.patch(
     catchHandler(validateRole(["superAdmin"])),
     catchHandler(updateAdminStatus)
 )
+
+router.post(
+    "/user",
+    catchHandler(validateCommonSignup),
+    catchHandler(createUser("user"))
+)
 export default router;
