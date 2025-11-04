@@ -5,7 +5,7 @@ import { connectDb } from "./utils/connectDb.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import jobRouter from "./routes/jobRoutes.js";
-
+import appliedJobRouter from "./routes/applyJobRoutes.js"
 env.config();
 const app = express();
 app.use(express.json());
@@ -14,6 +14,7 @@ app.use(cors())
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
+app.use("/api/v1/applied-job", appliedJobRouter);
 
 app.use((err, req, res, next) => {
     const statusCode = err.status
