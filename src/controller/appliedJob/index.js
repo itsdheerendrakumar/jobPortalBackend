@@ -46,3 +46,9 @@ export const assignJobToReviewer = async (req, res, next) => {
     await appliedJob.save();
     return res.status(200).json(new SuccessResponse('Reviewer added successfully', {}))
 }
+
+export const getAssignedJob = async (req, res, next) => {
+    const {userId} = req;
+    const assignedApplication = await AppliedJob.find({reviewerId: userId});
+    return res.status(200).json(new SuccessResponse("Assigned job found successfully", assignedApplication))
+}

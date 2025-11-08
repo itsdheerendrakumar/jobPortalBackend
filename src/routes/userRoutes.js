@@ -13,12 +13,12 @@ router.route("/admin")
     catchHandler(validateCommonSignup),
     catchHandler(createUser("admin"))
 )
-router.route("/admin/:adminId")
-.delete(
-    catchHandler(tokenValidater),
-    catchHandler(validateRole(["superAdmin"])),
-    catchHandler(deleteAdmin)
-)
+// router.route("/admin/:adminId")
+// .delete(
+//     catchHandler(tokenValidater),
+//     catchHandler(validateRole(["superAdmin"])),
+//     catchHandler(deleteAdmin)
+// )
 
 router.route("/reviewer")
 .post(
