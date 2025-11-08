@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { ErrorResponse } from "../../utils/errorResponse.js";
 import { User } from "../../model/userModel.js";
 import { SuccessResponse } from "../../utils/successResponse.js";
-import { userStatus } from "../../constants/enums.js";
+import { userRoles, userStatus } from "../../constants/enums.js";
 import { Job } from "../../model/jobModel.js";
 
 export const createUser = (role) => {
@@ -92,4 +92,23 @@ export const promoteReviewer = async (req, res, next) => {
     user.role = "admin";
     await user.save();
     return res.status(200).json(new SuccessResponse("User promoted successfully.", {}));
+}
+
+export const getUserSelectListing = async (req, res, next) => {
+    const {role} = req.query;
+    if(!userRoles.includes(role))
+        return next(new ErrorResponse("Provide valid role", 400))
+    const users = await User.aggregate([
+        {
+            $match: {role, status: "active"},
+        },
+        {
+            $project: {
+                label: "$name",
+                value: "$_id",
+                _id: 0
+            }
+        }
+    ]);
+    return res.status(200).json((new SuccessResponse("User listing found successfully", users)))
 }

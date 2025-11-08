@@ -28,8 +28,21 @@ export const applyJob = async (req, res, next) => {
 }
 
 export const findAppliedJobListing = async (req, res, next) => {
-    const jobs = await AppliedJob.find({})
-    .populate("jobId")
-    .populate({path: "userId", select: "-password"});
+    const jobs = await AppliedJob.find({reviewerId: {$exists: false}})
+    .select("createdAt jobId userId")
+    .populate({path: "jobId", select: "jobTitle deadline category -_id"})
+    .populate({path: "userId", select: "name -_id"});
     return res.status(200).json(new SuccessResponse("Applied job found succcessfully", jobs))
+}
+
+export const assignJobToReviewer = async (req, res, next) => {
+    const {docId, reviewerId} = req.body;
+    const p1 = AppliedJob.findById(docId);
+    const p2 = User.findById(reviewerId);
+    const [appliedJob, user] = await Promise.all([p1, p2]);
+    if(!appliedJob || !user)
+        return next(new ErrorResponse("Bad request", 400))
+    appliedJob.reviewerId = reviewerId;
+    await appliedJob.save();
+    return res.status(200).json(new SuccessResponse('Reviewer added successfully', {}))
 }
