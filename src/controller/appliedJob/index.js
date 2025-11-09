@@ -49,6 +49,11 @@ export const assignJobToReviewer = async (req, res, next) => {
 
 export const getAssignedJob = async (req, res, next) => {
     const {userId} = req;
-    const assignedApplication = await AppliedJob.find({reviewerId: userId});
+    const assignedApplication = await AppliedJob.find(
+        {reviewerId: userId},
+        {jobId: 1, userId: 1, createdAt: 1}
+    )
+    .populate({path: "jobId", select: "jobTitle companyName skills experience education"})
+    .populate({path: "userId", select: "name imageUrl resumeUrl skills education"});
     return res.status(200).json(new SuccessResponse("Assigned job found successfully", assignedApplication))
 }
