@@ -23,7 +23,7 @@ router.route("/")
 router.route("/:jobId")
 .get(
     catchHandler(tokenValidater),
-    catchHandler(validateRole(["admin", "user"])),
+    catchHandler(validateRole(["admin", "user", "reviewer"])),
     catchHandler(getJobById)
 )
 export default router;
