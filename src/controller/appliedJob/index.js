@@ -49,11 +49,58 @@ export const assignJobToReviewer = async (req, res, next) => {
 
 export const getAssignedJob = async (req, res, next) => {
     const {userId} = req;
-    const assignedApplication = await AppliedJob.find(
-        {reviewerId: userId},
-        {jobId: 1, userId: 1, createdAt: 1}
-    )
-    .populate({path: "jobId", select: "jobTitle companyName skills experience education"})
-    .populate({path: "userId", select: "name imageUrl resumeUrl skills education"});
-    return res.status(200).json(new SuccessResponse("Assigned job found successfully", assignedApplication))
+
+    const assignedApplication = await AppliedJob.aggregate([
+        {
+            $match: {reviewerId: new mongoose.Types.ObjectId(userId)}
+        },
+        {
+            $group: {
+                _id: "$jobId",
+                assignedJob: {
+                    $push: {userId: "$userId"}
+                },
+                appliedDates: {$push: "$createdAt"},
+                documentIds: {$push: "$_id"}
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "assignedJob.userId",
+                foreignField: "_id",
+                as: "applicantDetail"
+            }
+        },
+        {
+            $lookup: {
+                from: "jobs",
+                localField: "_id",
+                foreignField: "_id",
+                as: "jobDetails"
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                "applicantDetail.password": 0,
+                assignedJob: 0,
+                "jobDetails.minSalary": 0,
+                "jobDetails.maxSalary": 0,
+                "jobDetails.vacancy": 0,
+                "jobDetails.__v": 0,
+                "jobDetails.updatedAt": 0,
+                "jobDetails.createdBy": 0,
+                "jobDetails.location": 0,
+                "jobDetails.jobType": 0,
+                "jobDetails.category": 0,
+                "jobDetails.deadline": 0,
+                "jobDetails.createdAt": 0,
+            }
+        }
+    ])
+    return res.status(200).json(new SuccessResponse(
+        "Assigned job found successfully", 
+        assignedApplication?.[0] ? {...assignedApplication?.[0], jobDetails: assignedApplication?.[0]?.jobDetails?.[0]} : {}
+    ))
 }
