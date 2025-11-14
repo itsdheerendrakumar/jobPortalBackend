@@ -112,3 +112,13 @@ export const getUserSelectListing = async (req, res, next) => {
     ]);
     return res.status(200).json((new SuccessResponse("User listing found successfully", users)))
 }
+
+export const getTypeUserById = async (req, res, next) => {
+    const {id} = req.params;
+    if(!id)
+        return next(new ErrorResponse("Invalid user id.", 400));
+    const user = await User.findById(id).select("-password");
+    if(!user)
+        return new ErrorResponse("User not found.", 400)
+    return res.status(200).json(new SuccessResponse("User found successfully", user))
+}
