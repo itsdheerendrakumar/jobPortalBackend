@@ -1,9 +1,10 @@
 import express from "express";
 import { validateCommonSignup } from "../middleware/validateCommonSignup.js";
-import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus, promoteReviewer, getUserSelectListing, getTypeUserById } from "../controller/user/index.js";
+import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus, promoteReviewer, getUserSelectListing, getTypeUserById, uploadProfilePicture } from "../controller/user/index.js";
 import { tokenValidater } from "../middleware/validateToken.js";
 import { catchHandler } from "../utils/catchHandler.js";
 import { validateRole } from "../middleware/validateRole.js";
+import { profilePicture } from "../middleware/profilePicture.js";
 const router = express.Router();
 
 router.route("/admin")
@@ -79,4 +80,11 @@ router.get(
     catchHandler(validateRole(["admin"])),
     catchHandler(getUserSelectListing)
 )
+
+router.post(
+    "/profile",
+    catchHandler(profilePicture),
+    catchHandler(uploadProfilePicture)
+)
+
 export default router;

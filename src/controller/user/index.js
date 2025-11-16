@@ -122,3 +122,12 @@ export const getTypeUserById = async (req, res, next) => {
         return new ErrorResponse("User not found.", 400)
     return res.status(200).json(new SuccessResponse("User found successfully", user))
 }
+
+export const uploadProfilePicture = async (req, res, next) => {
+    console.log(req.file);
+    if(req.file.mime !== "image/png")
+        return next(new ErrorResponse("Incorrect file type", 400));
+    if(req.file.size > 204800)
+        return next(new ErrorResponse("File size is more than allowed size", 400));
+    return res.send("file received");
+}
