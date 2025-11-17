@@ -30,8 +30,8 @@ const userSchema = new mongoose.Schema({
         enum: userStatus,
         default: "active"
     },
-    imageUrl: {
-        type: String
+    imageData: {
+        type: Buffer
     },
     resumeUrl: {
         type: String

@@ -124,10 +124,20 @@ export const getTypeUserById = async (req, res, next) => {
 }
 
 export const uploadProfilePicture = async (req, res, next) => {
-    console.log(req.file);
-    if(req.file.mimetype !== "image/png")
+    if(!["image/png", "image/jpeg"].includes(req.file.mimetype))
         return next(new ErrorResponse("Incorrect file type", 400));
     if(req.file.size > 204800)
         return next(new ErrorResponse("File size is more than allowed size", 400));
-    return res.send("file received");
+    const user = await User.findById(req.userId);
+    console.log(user, req.userId)
+    if(!user)
+        return next(new ErrorResponse("User not found.", 400));
+    user.imageData = req.file.buffer;
+    await user.save();
+    return res.status(201).json(new SuccessResponse("Profile uploaded successfully.", {}))
 }
+
+export const getProfilePicture = async (req, res,next) => {
+    const user = await User.findById(req.userId).select("imageData -_id");
+    return res.send(user?.imageData);
+} 

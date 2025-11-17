@@ -1,6 +1,6 @@
 import express from "express";
 import { validateCommonSignup } from "../middleware/validateCommonSignup.js";
-import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus, promoteReviewer, getUserSelectListing, getTypeUserById, uploadProfilePicture } from "../controller/user/index.js";
+import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus, promoteReviewer, getUserSelectListing, getTypeUserById, uploadProfilePicture, getProfilePicture } from "../controller/user/index.js";
 import { tokenValidater } from "../middleware/validateToken.js";
 import { catchHandler } from "../utils/catchHandler.js";
 import { validateRole } from "../middleware/validateRole.js";
@@ -81,10 +81,15 @@ router.get(
     catchHandler(getUserSelectListing)
 )
 
-router.post(
-    "/profile",
+router.route("/profile")
+.post(
+    catchHandler(tokenValidater),
     catchHandler(profilePicture),
     catchHandler(uploadProfilePicture)
+)
+.get(
+    catchHandler(tokenValidater),
+    catchHandler(getProfilePicture)
 )
 
 export default router;
