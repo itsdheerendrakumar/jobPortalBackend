@@ -147,7 +147,14 @@ export const addEducation = async (req, res, next) => {
     const user = await User.findById(req.userId);
     if(!user || user?.role !== "user")
         return next(new ErrorResponse("User not found.", 400));
-    user.education = validatedBody;
+    user.education = validatedBody?.education;
     await user?.save();
     return res.status(200).json(new SuccessResponse("Education created successfully.", {}))
+}
+
+export const getUserEducation = async (req, res, next) => {
+    const user = await User.findById(req.userId).select("education role -_id");
+    if(!user || user?.role !== "user")
+        return next(new ErrorResponse("User not found.", 400));
+    return res.status(200).json(new SuccessResponse("Education found successfully.", user.education))
 }

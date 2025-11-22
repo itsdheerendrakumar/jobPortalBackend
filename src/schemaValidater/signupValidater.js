@@ -13,6 +13,12 @@ export const userEducationSchema = Joi.object({
         name: Joi.string().trim(),
         collegeName: Joi.string().trim(),
         percentage: Joi.string().trim(),
-        passYear: Joi.string().trim(),
+        passYear: Joi.alternatives()
+        .try(
+            Joi.string().trim(),
+            Joi.number()
+        ),
+
+
     })).required()
 })

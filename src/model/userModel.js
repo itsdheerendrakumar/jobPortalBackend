@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema({
         type: {String}
     },
     education: [{
+        _id: false,
         name: String,
         percentage: String,
         collegeName: String,
