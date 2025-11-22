@@ -140,4 +140,12 @@ export const uploadProfilePicture = async (req, res, next) => {
 export const getProfilePicture = async (req, res,next) => {
     const user = await User.findById(req.userId).select("imageData -_id");
     return res.send(user?.imageData);
-} 
+}
+
+export const addEducation = async (req, res, next) => {
+    const {validatedBody} = req;
+    const user = await User.findById(req.userId);
+    user.education = validatedBody;
+    await user?.save();
+    return res.status(200).json(new SuccessResponse("Education created successfully.", {}))
+}

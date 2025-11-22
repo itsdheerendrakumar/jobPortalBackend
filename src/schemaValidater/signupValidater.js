@@ -7,3 +7,12 @@ export const commonSignupSchemaValidater = Joi.object({
     phone: Joi.string().trim().min(4).max(13).pattern(/^[0-9]+$/, "Phone will contain digits only").required(),
     country: Joi.string().trim().max(40).required()
 });
+
+export const userEducationSchema = Joi.object({
+    education: Joi.array().items(Joi.object({
+        name: Joi.string().trim(),
+        collegeName: Joi.string().trim(),
+        percentage: Joi.string().trim(),
+        passYear: Joi.string().trim(),
+    })).required()
+})
