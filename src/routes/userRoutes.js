@@ -96,7 +96,6 @@ router.route("/profile")
 router.route("/education")
 .post(
     catchHandler(tokenValidater),
-    catchHandler(validateRole(["user"])),
     catchHandler(validateEducation),
     catchHandler(addEducation)
 )

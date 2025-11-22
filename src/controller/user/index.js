@@ -145,6 +145,8 @@ export const getProfilePicture = async (req, res,next) => {
 export const addEducation = async (req, res, next) => {
     const {validatedBody} = req;
     const user = await User.findById(req.userId);
+    if(!user || user?.role !== "user")
+        return next(new ErrorResponse("User not found.", 400));
     user.education = validatedBody;
     await user?.save();
     return res.status(200).json(new SuccessResponse("Education created successfully.", {}))
