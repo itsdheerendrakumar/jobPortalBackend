@@ -20,7 +20,7 @@ export const applyJob = async (req, res, next) => {
         return next(new ErrorResponse("Job does not found", 400));
     if(new Date() >= new Date(job?.deadline))
         return next(new ErrorResponse("Job is expired.", 400));
-    const alreadyApplied = await AppliedJob.findOne({userId});
+    const alreadyApplied = await AppliedJob.findOne({userId, jobId});
     if(alreadyApplied)
         return next(new ErrorResponse("User has already applied for this job", 400));
     await AppliedJob.insertOne({userId, jobId});
@@ -52,7 +52,10 @@ export const getAssignedJob = async (req, res, next) => {
 
     const assignedApplication = await AppliedJob.aggregate([
         {
-            $match: {reviewerId: new mongoose.Types.ObjectId(userId)}
+            $match: {
+                reviewerId: new mongoose.Types.ObjectId(userId), 
+                reviewerStatus: "pending"
+            }
         },
         {
             $group: {
@@ -99,8 +102,21 @@ export const getAssignedJob = async (req, res, next) => {
             }
         }
     ])
+    console.log(assignedApplication)
     return res.status(200).json(new SuccessResponse(
         "Assigned job found successfully", 
-        assignedApplication?.[0] ? {...assignedApplication?.[0], jobDetails: assignedApplication?.[0]?.jobDetails?.[0]} : {}
+        assignedApplication
     ))
+}
+
+export const reviewerResponseOnAppliedJob = async (req, res, next) => {
+    const {docId, reviewerStatus, reason} = req.validatedBody;
+    console.log(req.validatedBody)
+    const appliedJob = await AppliedJob.findById(new mongoose.Types.ObjectId(docId));
+    if(!appliedJob)
+        return next(new ErrorResponse("Applied job not found", 400));
+    appliedJob.reviewerStatus = reviewerStatus;
+    appliedJob.reason = reason;
+    await appliedJob.save();
+    return res.status(200).json(new SuccessResponse("Reviewer response saved successfully", {}))
 }
