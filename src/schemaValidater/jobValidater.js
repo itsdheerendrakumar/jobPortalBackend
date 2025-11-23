@@ -8,7 +8,7 @@ export const jobSchema = Joi.object({
     category: Joi.string().valid(...jobCategory).required(),
     vacancy: Joi.number().positive().min(1).required(),
     minSalary: Joi.number().positive().min(240000).optional(),
-    maxSalary: Joi.number().positive().min(1200000).optional(),
+    maxSalary: Joi.number().positive().min(240000).max(1200000).optional(),
     location: Joi.string().trim().min(6).max(60).required(),
     education: Joi.string().required(),
     experience: Joi.number().min(0).required(),
