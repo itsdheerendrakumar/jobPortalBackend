@@ -21,3 +21,9 @@ export const userRoles = [
 ]
 
 export const userStatus = ["active", "inactive"]
+
+export const applicationStatus = [
+    "pending",
+    "selected",
+    "rejected"
+]

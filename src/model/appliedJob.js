@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applicationStatus } from "../constants/enums.js";
 
 const appliedJobSchema = new mongoose.Schema({
     jobId: {
@@ -17,13 +18,15 @@ const appliedJobSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "User"
     },
-    isSelectedByReviewer: {
-        type: Boolean,
-        default: false,
+    reviewerStatus: {
+        type: String,
+        enum: applicationStatus,
+        default: "pending",
     },
-    isSelectedByAdmin: {
-        type: Boolean,
-        default: false,
+    adminStatus: {
+        type: String,
+        enum: applicationStatus,
+        default: "pending",
     },
     reason: {
         type: String,
