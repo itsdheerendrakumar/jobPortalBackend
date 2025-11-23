@@ -24,6 +24,10 @@ const appliedJobSchema = new mongoose.Schema({
     isSelectedByAdmin: {
         type: Boolean,
         default: false,
+    },
+    reason: {
+        type: String,
+        required: true
     }
 }, {timestamps: true});
 
