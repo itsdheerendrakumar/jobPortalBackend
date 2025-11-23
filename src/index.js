@@ -17,7 +17,7 @@ app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/applied-job", appliedJobRouter);
 
 app.use((err, req, res, next) => {
-    const statusCode = err.status
+    const statusCode = err?.status ?? 500
     const message = err?.message
     return res.status(statusCode).json({ message });
 });
