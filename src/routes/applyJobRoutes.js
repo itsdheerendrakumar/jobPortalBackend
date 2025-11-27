@@ -1,7 +1,7 @@
 import express from "express";
 import { catchHandler } from "../utils/catchHandler.js";
 import { tokenValidater } from "../middleware/validateToken.js";
-import { applyJob, assignJobToReviewer, findAppliedJobListing, getAssignedJob, reviewerResponseOnAppliedJob } from "../controller/appliedJob/index.js";
+import { applyJob, assignJobToReviewer, findAppliedJobListing, getAssignedJob, getReviewerSelectedApplication, reviewerResponseOnAppliedJob } from "../controller/appliedJob/index.js";
 import { validateRole } from "../middleware/validateRole.js";
 import { reviewerResponseToAppliedJob } from "../middleware/reviewerResponseToAppliedJob.js";
 const router = express.Router();
@@ -35,4 +35,12 @@ router.route("/assigned-job")
     catchHandler(reviewerResponseToAppliedJob),
     catchHandler(reviewerResponseOnAppliedJob)
 )
+
+router.get(
+    "/selected-application-by-reviewer",
+    catchHandler(tokenValidater),
+    catchHandler(validateRole(["admin"])),
+    catchHandler(getReviewerSelectedApplication)
+)
+
 export default router;
