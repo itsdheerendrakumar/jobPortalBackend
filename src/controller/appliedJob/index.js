@@ -120,3 +120,78 @@ export const reviewerResponseOnAppliedJob = async (req, res, next) => {
     await appliedJob.save();
     return res.status(200).json(new SuccessResponse("Reviewer response saved successfully", {}))
 }
+
+export const getReviewerSelectedApplication = async (req, res, next) => {
+    const {userId} = req;
+    // const selectedApplications = await AppliedJob.find({adminId: new mongoose.Types.ObjectId(userId), reviewerStatus: "selected"})
+    // .populate({path: "jobId", select: "jobTitle"})
+    // .populate({path: "userId", select: "name email phone"})
+    // .populate({path: "reviewerId", select: "name email phone -_id"});
+    // return res.status(200).json(new SuccessResponse("Selected application found successfully", selectedApplications))
+    const data = await AppliedJob.aggregate([
+        {
+            $lookup: {
+                from: "jobs",
+                localField: "jobId",
+                foreignField: "_id",
+                as: "jobDetails"
+            }
+        },
+        {
+            $match: {
+                "jobDetails.createdBy": new mongoose.Types.ObjectId(userId),
+                reviewerStatus: "selected",
+                adminStatus: "pending",
+            }
+        },
+        {
+            $project: {
+                reason: 1,
+                reviewerId: 1,
+                userId: 1,
+                jobDetails: {
+                    companyName: {$first: "$jobDetails.companyName"},
+                    jobTitle: {$first: "$jobDetails.jobTitle"},
+                    jobId: {$first: "$jobDetails._id"}
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "applicantDetail"
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "reviewerId",
+                foreignField: "_id",
+                as: "reviewerDetail"
+            }
+        },
+        {
+            $project: {
+                reason: 1,
+                reviewerDetail: {$first: "$reviewerDetail"},
+                applicantDetail: {$first: "$applicantDetail"},
+                jobDetails: {$first: "$jobDetails"},
+            }
+        },
+        {
+            $project: {
+                reason: 1,
+                "reviewerDetail.name": 1,
+                "reviewerDetail.email": 1,
+                "applicantDetail.name": 1,
+                "applicantDetail._id": 1,
+                "applicantDetail.skills": 1,
+                jobDetails: 1
+            }
+        }
+       
+    ])
+    res.status(200).json(new SuccessResponse("Reviewed application found successfully", data))
+}
