@@ -23,7 +23,7 @@ export const login = async (req, res, next) => {
 }
 
 export const getProfile = async (req, res, next) => {
-    console.log("req is coming here")
+
     const user = await User.aggregate([
         {
             $match: {_id: new mongoose.Types.ObjectId(req.userId)}
@@ -33,7 +33,7 @@ export const getProfile = async (req, res, next) => {
                 userId: "$_id",
                 name: 1,
                 role: 1,
-                imageUrl: 1,
+                resumePublicId: 1,
                 status: 1,
                 _id: 0
             }
