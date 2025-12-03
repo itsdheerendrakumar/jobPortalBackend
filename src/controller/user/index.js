@@ -4,6 +4,8 @@ import { User } from "../../model/userModel.js";
 import { SuccessResponse } from "../../utils/successResponse.js";
 import { userRoles, userStatus } from "../../constants/enums.js";
 import { Job } from "../../model/jobModel.js";
+import { cloudinary } from "../../utils/cloudnarySetup.js";
+import { genCloudinaryPublicUrl } from "../../utils/generateCloudinaryPublicUrl.js";
 
 export const createUser = (role) => {
     return async (req, res, next) => {
@@ -152,4 +154,45 @@ export const getUserEducation = async (req, res, next) => {
     if(!user || user?.role !== "user")
         return next(new ErrorResponse("User not found.", 400));
     return res.status(200).json(new SuccessResponse("Education found successfully.", user.education))
+}
+
+export const uploadResume = async (req, res, next) => {
+    const user = await User.findById(req.userId);
+    if(!user)
+        return next(new ErrorResponse("User not found", 400));
+    if(user?.role !== "user")
+        return next(new ErrorResponse("Unauthorized access", 400));
+    if(!req.file)
+        return next(new ErrorResponse("Provide file", 400));
+    if(!!user?.resumePublicId){
+        const options = {resource_type: "raw", type: "authenticated"};
+       const res =  await cloudinary.uploader.destroy(user?.resumePublicId, options);
+    }
+    const resumeData = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+            {
+                folder: "jobPortal/resume",
+                type: "authenticated",
+                resource_type: "raw",
+                format: "pdf"
+            },
+            (error, uploadResult) => {
+            if (error) {
+                return reject(error);
+            }
+            return resolve(uploadResult);
+        }).end(req.file.buffer);
+    })
+    user.resumePublicId = resumeData?.public_id;
+    user.resumeUploadedDate = new Date();
+    await user.save();
+    return res.status(200).json(new SuccessResponse("Resume uploaded successfully", {}))
+}
+
+export const getResumeUrl = async (req, res, next) => {
+    const publicId = req.query?.publicId;
+    if(!publicId)
+        return next(new ErrorResponse("Provide valid resume id", 400));
+    const url = genCloudinaryPublicUrl(publicId);
+    return res.status(200).json(new SuccessResponse("Url generated successfully", {url}))
 }

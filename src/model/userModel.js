@@ -33,8 +33,11 @@ const userSchema = new mongoose.Schema({
     imageData: {
         type: Buffer
     },
-    resumeUrl: {
+    resumePublicId: {
         type: String
+    },
+    resumeUploadedDate: {
+        type: Date
     },
     skills: {
         type: {String}
