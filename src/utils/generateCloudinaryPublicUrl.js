@@ -5,7 +5,9 @@ export const genCloudinaryPublicUrl = (publicId) => {
         type: "authenticated",
         resource_type: "raw",
         sign_url: true,
+        flags: "attachment",
+        expires_at: Math.floor(Date.now() / 1000) + 3600
     }
-    const url = cloudinary.url(publicId, options);
+    const url = cloudinary.utils.private_download_url(`${publicId}`, "pdf", options);
     return url;
 }
