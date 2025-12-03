@@ -164,12 +164,17 @@ export const uploadResume = async (req, res, next) => {
         return next(new ErrorResponse("Unauthorized access", 400));
     if(!req.file)
         return next(new ErrorResponse("Provide file", 400));
+    if(!!user?.resumePublicId){
+        const options = {resource_type: "raw", type: "authenticated"};
+       const res =  await cloudinary.uploader.destroy(user?.resumePublicId, options);
+    }
     const resumeData = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
             {
                 folder: "jobPortal/resume",
                 type: "authenticated",
-                resource_type: "raw"
+                resource_type: "raw",
+                format: "pdf"
             },
             (error, uploadResult) => {
             if (error) {
