@@ -119,10 +119,14 @@ export const getTypeUserById = async (req, res, next) => {
     const {id} = req.params;
     if(!id)
         return next(new ErrorResponse("Invalid user id.", 400));
-    const user = await User.findById(id).select("-password");
+    const user = await User.findById(id).select("-password -updatedAt -__v");
     if(!user)
         return new ErrorResponse("User not found.", 400)
-    return res.status(200).json(new SuccessResponse("User found successfully", user))
+    const userObject = user.toObject();
+    // userObject.imageData = userObject.imageData?.toString("base64");
+    userObject.resumeUrl = userObject?.resumePublicId ? genCloudinaryPublicUrl(userObject?.resumePublicId) : null;
+    const {resumePublicId, role, imageData, ...rest} = userObject;
+    return res.status(200).json(new SuccessResponse("User found successfully", rest))
 }
 
 export const uploadProfilePicture = async (req, res, next) => {
