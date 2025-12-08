@@ -3,7 +3,7 @@ import { Job } from "../../model/jobModel.js";
 import { User } from "../../model/userModel.js";
 import { ErrorResponse } from "../../utils/errorResponse.js";
 import { SuccessResponse } from "../../utils/successResponse.js";
-import mongoose from "mongoose";
+import mongoose, { Error } from "mongoose";
 
 export const applyJob = async (req, res, next) => {
     const {userId} = req;
@@ -194,4 +194,87 @@ export const getReviewerSelectedApplication = async (req, res, next) => {
        
     ])
     res.status(200).json(new SuccessResponse("Reviewed application found successfully", data))
+}
+
+export const adminResponseToApplication = async (req, res, next) => {
+    const {docId, adminStatus} = req.body;
+    if(!docId || ["pending", "rejected"].includes(adminStatus))
+        return next(new ErrorResponse("Validation failed", 400));
+    const application = await AppliedJob.findById(docId);
+    if(!application)
+        return next(new ErrorResponse("Application does not exist", 400));
+    if(["selected", "rejected"].includes(application?.adminStatus))
+        return next(new ErrorResponse("Admin response already submitted"))
+    application.adminStatus = adminStatus;
+    await application.save();
+    return res.status(200).json(new SuccessResponse("Response saved successfully", {}));
+}
+
+export const getSelectedApplicationByAdmin = async (req, res, next) => {
+    const {userId} = req;
+    const data = await AppliedJob.aggregate([
+        {
+            $lookup: {
+                from: "jobs",
+                localField: "jobId",
+                foreignField: "_id",
+                as: "jobDetails"
+            }
+        },
+        {
+            $match: {
+                "jobDetails.createdBy": new mongoose.Types.ObjectId(userId),
+                adminStatus: "selected",
+            }
+        },
+        {
+            $project: {
+                reason: 1,
+                reviewerId: 1,
+                userId: 1,
+                jobDetails: {
+                    companyName: {$first: "$jobDetails.companyName"},
+                    jobTitle: {$first: "$jobDetails.jobTitle"},
+                    jobId: {$first: "$jobDetails._id"}
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "applicantDetail"
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "reviewerId",
+                foreignField: "_id",
+                as: "reviewerDetail"
+            }
+        },
+        {
+            $project: {
+                reason: 1,
+                reviewerDetail: {$first: "$reviewerDetail"},
+                applicantDetail: {$first: "$applicantDetail"},
+                jobDetails: {$first: "$jobDetails"},
+            }
+        },
+        {
+            $project: {
+                reason: 1,
+                "reviewerDetail.name": 1,
+                "reviewerDetail.email": 1,
+                "applicantDetail.name": 1,
+                "applicantDetail._id": 1,
+                "applicantDetail.skills": 1,
+                jobDetails: 1
+            }
+        }
+       
+    ])
+    return res.status(200).json(new SuccessResponse("Selected application found successfully", data))
 }
