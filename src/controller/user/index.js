@@ -6,6 +6,7 @@ import { userRoles, userStatus } from "../../constants/enums.js";
 import { Job } from "../../model/jobModel.js";
 import { cloudinary } from "../../utils/cloudnarySetup.js";
 import { genCloudinaryPublicUrl } from "../../utils/generateCloudinaryPublicUrl.js";
+import { AppliedJob } from "../../model/appliedJob.js";
 
 export const createUser = (role) => {
     return async (req, res, next) => {
@@ -28,7 +29,7 @@ export const createUser = (role) => {
 
 export const getSuperAdminMetrics = async (req, res, next) => {
 
-    const metrics = await User.aggregate([
+    const p1 = User.aggregate([
         {
             $group: {
                 _id: "$role",
@@ -48,8 +49,10 @@ export const getSuperAdminMetrics = async (req, res, next) => {
             }
         }
     ]);
+    const p2 = AppliedJob.find({adminStatus: "pending"}).countDocuments();
+    const [metrics, pendingApplications] = await Promise.all([p1, p2]);
     const {superAdmin, ...rest} = metrics?.[0]?.metrics;
-    return res.status(200).json(new SuccessResponse("Metrics found successfully", rest));
+    return res.status(200).json(new SuccessResponse("Metrics found successfully", {...rest, pendingApplications}));
 
 }
 
