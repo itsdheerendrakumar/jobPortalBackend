@@ -205,3 +205,17 @@ export const getResumeUrl = async (req, res, next) => {
     const url = genCloudinaryPublicUrl(publicId);
     return res.status(200).json(new SuccessResponse("Url generated successfully", {url}))
 }
+
+export const updateReviewerStatus = async (req, res, next) => {
+    const {reviewerId, status} = req.body;
+    if(!(reviewerId && ["active", "inactive"].includes(status)))
+        next(new ErrorResponse("Provide correct data", 400))
+    const reviewer = await User.findById(reviewerId);
+    if(!reviewer)
+        return next(new ErrorResponse("Reviwer does not exists", 400))
+    if(reviewer.role !== "reviewer")
+        return next(new ErrorResponse("Given id is not of reviwer", 400))
+    reviewer.status = status;
+    await reviewer.save();
+    return res.status(200).json(new SuccessResponse("Reviwer status changed successfully", {}))
+}
