@@ -67,6 +67,8 @@ export const getUserListing = (role) => {
 
 export const updateAdminStatus = async (req, res, next) => {
     const {status, adminId} = req.body;
+    if(adminId === "68f79cba2a178a0dc8fdfdbc")
+        return next(new ErrorResponse("Status of this user can't be changed."))
     if(!userStatus.includes(status))
         return next(new ErrorResponse("Invalid status value", 400));
     const admin = await User.findById(adminId);
