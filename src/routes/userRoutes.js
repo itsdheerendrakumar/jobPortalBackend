@@ -30,12 +30,12 @@ router.route("/reviewer")
     catchHandler(validateCommonSignup),
     catchHandler(createUser("reviewer"))
 )
-router.patch(
-    "/promote-reviewer",
-    catchHandler(tokenValidater),
-    catchHandler(validateRole(["superAdmin"])),
-    catchHandler(promoteReviewer)
-)
+// router.patch(
+//     "/promote-reviewer",
+//     catchHandler(tokenValidater),
+//     catchHandler(validateRole(["superAdmin"])),
+//     catchHandler(promoteReviewer)
+// )
 
 router.get(
     "/admin-metrics",
