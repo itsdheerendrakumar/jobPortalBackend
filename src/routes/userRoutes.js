@@ -1,6 +1,6 @@
 import express from "express";
 import { validateCommonSignup } from "../middleware/validateCommonSignup.js";
-import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus, promoteReviewer, getUserSelectListing, getTypeUserById, uploadProfilePicture, getProfilePicture, addEducation, getUserEducation, uploadResume, getResumeUrl } from "../controller/user/index.js";
+import { createUser, deleteAdmin, getUserListing, getSuperAdminMetrics, updateAdminStatus, promoteReviewer, getUserSelectListing, getTypeUserById, uploadProfilePicture, getProfilePicture, addEducation, getUserEducation, uploadResume, getResumeUrl, updateReviewerStatus } from "../controller/user/index.js";
 import { tokenValidater } from "../middleware/validateToken.js";
 import { catchHandler } from "../utils/catchHandler.js";
 import { validateRole } from "../middleware/validateRole.js";
@@ -30,12 +30,12 @@ router.route("/reviewer")
     catchHandler(validateCommonSignup),
     catchHandler(createUser("reviewer"))
 )
-router.patch(
-    "/promote-reviewer",
-    catchHandler(tokenValidater),
-    catchHandler(validateRole(["superAdmin"])),
-    catchHandler(promoteReviewer)
-)
+// router.patch(
+//     "/promote-reviewer",
+//     catchHandler(tokenValidater),
+//     catchHandler(validateRole(["superAdmin"])),
+//     catchHandler(promoteReviewer)
+// )
 
 router.get(
     "/admin-metrics",
@@ -61,6 +61,12 @@ router.patch(
     catchHandler(tokenValidater), 
     catchHandler(validateRole(["superAdmin"])),
     catchHandler(updateAdminStatus)
+)
+router.patch(
+    "/reviewer-status",
+    catchHandler(tokenValidater), 
+    catchHandler(validateRole(["admin"])),
+    catchHandler(updateReviewerStatus)
 )
 
 router.post(
