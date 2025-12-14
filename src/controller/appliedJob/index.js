@@ -278,3 +278,11 @@ export const getSelectedApplicationByAdmin = async (req, res, next) => {
     ])
     return res.status(200).json(new SuccessResponse("Selected application found successfully", data))
 }
+
+export const getAppliedJobForUser = async (req, res, next) => {
+    const {userId} = req;
+    const appliedJobs = await AppliedJob.find({userId})
+    .select("adminStatus reviewerStatus createdAt jobId -_id")
+    .populate({path: "jobId", select: "jobTitle companyName location jobType deadline _id"});
+    return res.status(200).json(new SuccessResponse("Applied jobs found successfully", appliedJobs))
+}
