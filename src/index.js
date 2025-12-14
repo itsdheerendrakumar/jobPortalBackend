@@ -22,6 +22,14 @@ app.use((err, req, res, next) => {
     return res.status(statusCode).json({ message });
 });
 
+app.get("/health", (req, res) => {
+  return res.status(200).json({
+    status: "ok",
+    message: "Service is healthy and running",
+  });
+});
+
+
 (() => {
     connectDb()
         .then(() => {
