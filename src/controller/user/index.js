@@ -208,6 +208,8 @@ export const getResumeUrl = async (req, res, next) => {
 
 export const updateReviewerStatus = async (req, res, next) => {
     const {reviewerId, status} = req.body;
+    if(reviewerId === "693ee7f5bfbf7260d47d030f")
+        return next(new ErrorResponse("Status of this user can't be changed.", 400))
     if(!(reviewerId && ["active", "inactive"].includes(status)))
         next(new ErrorResponse("Provide correct data", 400))
     const reviewer = await User.findById(reviewerId);
